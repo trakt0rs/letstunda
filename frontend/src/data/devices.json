@@ -1,0 +1,38 @@
+[
+  {
+    "id": "car",
+    "name": "Car",
+    "image": "/devices/car.svg",
+    "durationMinutes": 360,
+    "powerKw": 11,
+    "splittable": true,
+    "deadline": "07:00"
+  },
+  {
+    "id": "washing-machine",
+    "name": "Washing machine",
+    "image": "/devices/washing-machine.svg",
+    "durationMinutes": 120,
+    "powerKw": 1,
+    "splittable": false,
+    "deadline": null
+  },
+  {
+    "id": "dishwasher",
+    "name": "Dishwasher",
+    "image": "/devices/dishwasher.svg",
+    "durationMinutes": 180,
+    "powerKw": 0.5,
+    "splittable": false,
+    "deadline": null
+  },
+  {
+    "id": "boiler",
+    "name": "Water heater",
+    "image": "/devices/boiler.svg",
+    "durationMinutes": 180,
+    "powerKw": 2,
+    "splittable": true,
+    "deadline": "18:00"
+  }
+]

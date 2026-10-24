@@ -1,0 +1,40 @@
+import { useEffect, useState } from 'react'
+import { fetchPrices, type PricePoint } from './prices'
+
+const SLOT = 15 * 60_000
+
+// Current time that updates at the start of every 15-minute price slot.
+function useSlotClock() {
+  const [now, setNow] = useState(() => Date.now())
+  useEffect(() => {
+    const timeout = setTimeout(() => setNow(Date.now()), SLOT - (Date.now() % SLOT) + 1000)
+    return () => clearTimeout(timeout)
+  }, [now])
+  return now
+}
+
+// 15-minute prices from `historyDays` ago up to the latest published day.
+// Refetches every slot, so tomorrow's prices appear once published and the day rolls over at midnight.
+export function usePrices(historyDays: number) {
+  const [prices, setPrices] = useState<PricePoint[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const now = useSlotClock()
+
+  useEffect(() => {
+    const controller = new AbortController()
+    setLoading(true)
+    setError('')
+    fetchPrices(historyDays, controller.signal)
+      .then(setPrices)
+      .catch(() => {
+        if (!controller.signal.aborted) setError('Could not load prices')
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setLoading(false)
+      })
+    return () => controller.abort()
+  }, [historyDays, now])
+
+  return { prices, loading, error, now }
+}

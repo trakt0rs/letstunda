@@ -41,7 +41,15 @@ button {
   color: #dc2626;
 }
 
+/* Main screen fills exactly one viewport: the chart takes whatever height is left. */
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+}
+
 .navbar {
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -103,9 +111,23 @@ button {
 }
 
 .content {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  box-sizing: border-box;
+  width: 100%;
   max-width: 1200px;
   margin: 0 auto;
   padding: 24px 16px;
+}
+
+.prices {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .prices-header {
@@ -174,6 +196,8 @@ button {
 }
 
 .chart {
+  flex: 1;
+  min-height: 160px;
   transition: opacity 0.15s;
 }
 
@@ -200,4 +224,98 @@ button {
 
 .empty {
   color: #898781;
+}
+
+.devices {
+  flex-shrink: 0;
+}
+
+.devices h2 {
+  margin: 0 0 16px;
+  font-size: 16px;
+  font-weight: 500;
+  color: #52514e;
+}
+
+.device-list {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding-bottom: 8px;
+}
+
+.device-card {
+  flex: 0 0 280px;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid #e1e0d9;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.device-card:hover:not([aria-disabled='true']) {
+  border-color: #c3c2b7;
+}
+
+.device-card.selected {
+  border-color: #1baf7a;
+  box-shadow: 0 0 0 1px #1baf7a;
+}
+
+.device-card[aria-disabled='true'] {
+  cursor: default;
+}
+
+.device-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.device-title img {
+  padding: 6px;
+  border-radius: 8px;
+  background: #cde2fb;
+}
+
+.device-title h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.device-windows {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-variant-numeric: tabular-nums;
+}
+
+.device-more,
+.device-meta {
+  margin: 0;
+  color: #898781;
+  font-size: 13px;
+}
+
+.device-cost {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.device-cost span {
+  color: #898781;
+  font-size: 12px;
+  font-weight: 400;
 }

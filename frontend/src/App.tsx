@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { authClient } from './lib/auth-client'
+import MainScreen from './MainScreen'
 
 function App() {
   const { data: session, isPending } = authClient.useSession()
@@ -10,14 +11,7 @@ function App() {
 
   if (isPending) return null
 
-  if (session) {
-    return (
-      <main className="center">
-        <span>Logged in: {session.user.email}</span>
-        <button onClick={() => authClient.signOut()}>Logout</button>
-      </main>
-    )
-  }
+  if (session) return <MainScreen user={session.user} />
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()

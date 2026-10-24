@@ -40,3 +40,164 @@ button {
   margin: 0;
   color: #dc2626;
 }
+
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.logo {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.profile {
+  position: relative;
+}
+
+.profile-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.avatar {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #2563eb;
+  color: #fff;
+  font-weight: 600;
+}
+
+.dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 4px;
+  min-width: 160px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  background: #fff;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 0.1);
+}
+
+.dropdown button {
+  width: 100%;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.dropdown button:hover {
+  background: #f3f4f6;
+}
+
+.content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+
+.prices-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.prices h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 500;
+  color: #52514e;
+}
+
+.prices-now {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 4px 0 0;
+  color: #52514e;
+}
+
+.prices-now strong {
+  font-size: 48px;
+  font-weight: 600;
+  color: #0b0b0b;
+}
+
+.prices-now span {
+  color: #898781;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.segmented {
+  display: flex;
+  border: 1px solid #e1e0d9;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.segmented button {
+  border: none;
+  background: none;
+  padding: 6px 14px;
+  cursor: pointer;
+  color: #52514e;
+}
+
+.segmented button:disabled {
+  color: #c3c2b7;
+  cursor: not-allowed;
+}
+
+.segmented button.active {
+  background: #0b0b0b;
+  color: #fff;
+}
+
+.chart {
+  transition: opacity 0.15s;
+}
+
+.chart.loading {
+  opacity: 0.5;
+}
+
+.tooltip {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 10px;
+  border: 1px solid rgba(11, 11, 11, 0.1);
+  border-radius: 6px;
+  background: #fff;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 0.1);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.tooltip span {
+  color: #52514e;
+}
+
+.empty {
+  color: #898781;
+}

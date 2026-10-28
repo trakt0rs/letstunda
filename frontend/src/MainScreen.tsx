@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { authClient } from './lib/auth-client'
-import { devices } from './lib/devices'
+import { useDevices } from './lib/useDevices'
 import { bestSchedule } from './lib/schedule'
 import { usePrices } from './lib/usePrices'
 import DeviceCards from './DeviceCards'
@@ -15,11 +15,13 @@ function MainScreen({ user }: Props) {
   const dropdownRef = useRef<HTMLDivElement>(null)
   const [selectedDeviceId, setSelectedDeviceId] = useState<string | null>(null)
 
+  const { devices } = useDevices();
+
   // Best run times per device; the selected device's times are highlighted on the chart.
   const { prices, now } = usePrices(0)
   const schedules = useMemo(
     () => new Map(devices.map((d) => [d.id, bestSchedule(prices, d, now)])),
-    [prices, now],
+    [prices, now, devices],
   )
   const selectedWindows = selectedDeviceId ? schedules.get(selectedDeviceId)?.windows : undefined
   const highlight = selectedDeviceId && selectedWindows ? { id: selectedDeviceId, windows: selectedWindows } : null
@@ -56,6 +58,7 @@ function MainScreen({ user }: Props) {
           now={now}
           selectedId={selectedDeviceId}
           onSelect={(id) => setSelectedDeviceId(id === selectedDeviceId ? null : id)}
+          devices={devices}
         />
       </main>
     </div>

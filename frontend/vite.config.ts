@@ -9,7 +9,7 @@ export default defineConfig(({ mode }) => {
     plugins: [react()],
     server: {
       proxy: {
-        '/api': env.API_URL,
+        '/api': env.API_URL ?? 'http://localhost:3000',
         // Elering doesn't send CORS headers, so the browser can't call it directly.
         '/elering': {
           target: 'https://dashboard.elering.ee',

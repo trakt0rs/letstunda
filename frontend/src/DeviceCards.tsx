@@ -1,4 +1,4 @@
-import { devices, type Device } from './lib/devices'
+import type {Device} from './lib/devices'
 import { formatTime, rigaDate } from './lib/prices'
 import type { Schedule, TimeWindow } from './lib/schedule'
 
@@ -10,9 +10,10 @@ type Props = {
   selectedId: string | null
   // Called with the clicked device; clicking the selected one again should deselect it.
   onSelect: (id: string) => void
+  devices: Device[]
 }
 
-function DeviceCards({ schedules, now, selectedId, onSelect }: Props) {
+function DeviceCards({ schedules, now, selectedId, onSelect, devices }: Props) {
   return (
     <section className="devices">
       <h2>My devices</h2>

@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { createObserveModule } from '@nestjs/observe';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
+import { DevicesModule } from './devices/devices.module.js';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
@@ -15,6 +16,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
       runtimeMetrics: !Boolean(process.versions?.['webcontainer']),
       serviceId: 'nest-typescript-starter',
     }),
+    DevicesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

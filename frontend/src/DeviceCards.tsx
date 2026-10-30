@@ -1,6 +1,6 @@
 import type {Device} from './lib/devices'
-import { formatTime, rigaDate } from './lib/prices'
-import type { Schedule, TimeWindow } from './lib/schedule'
+import {windowLabel, formatDuration, formatKwh } from "./lib/format-properties.js"
+import type { Schedule } from './lib/schedule'
 
 const MAX_WINDOWS = 3
 
@@ -85,19 +85,5 @@ function DeviceCard({ device, schedule, now, selected, onSelect }: DeviceCardPro
     </article>
   )
 }
-
-function windowLabel(w: TimeWindow, now: number) {
-  const day = rigaDate(w.start) === rigaDate(now) ? 'Today' : 'Tomorrow'
-  return `${day} ${formatTime(w.start)}–${formatTime(w.end)}`
-}
-
-function formatDuration(minutes: number) {
-  const h = Math.floor(minutes / 60)
-  const m = minutes % 60
-  if (h === 0) return `${m}m`
-  return m === 0 ? `${h}h` : `${h}h ${m}m`
-}
-
-const formatKwh = (kwh: number) => String(Number(kwh.toFixed(1)))
 
 export default DeviceCards

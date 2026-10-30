@@ -5,6 +5,8 @@ import { bestSchedule } from './lib/schedule'
 import { usePrices } from './lib/usePrices'
 import DeviceCards from './DeviceCards'
 import PriceChart from './PriceChart'
+import { Routes, Route, NavLink } from 'react-router'
+import { DevicesPage } from './DevicesPage'
 
 type Props = {
   user: { email: string }
@@ -38,7 +40,11 @@ function MainScreen({ user }: Props) {
   return (
     <div className="app">
       <nav className="navbar">
-        <span className="logo">Lētstunda</span>
+        <div className="nav-left">
+          <span className="logo">Lētstunda</span>
+          <NavLink to="/" end className="nav-link">Pārskats</NavLink>
+          <NavLink to="/devices" className="nav-link">Ierīces</NavLink>
+        </div>
         <div className="profile" ref={dropdownRef}>
           <button className="profile-button" onClick={() => setOpen(!open)}>
             <span className="avatar">{user.email[0].toUpperCase()}</span>
@@ -52,14 +58,21 @@ function MainScreen({ user }: Props) {
         </div>
       </nav>
       <main className="content">
-        <PriceChart highlight={highlight} />
-        <DeviceCards
-          schedules={schedules}
-          now={now}
-          selectedId={selectedDeviceId}
-          onSelect={(id) => setSelectedDeviceId(id === selectedDeviceId ? null : id)}
-          devices={devices}
-        />
+        <Routes>
+          <Route path="/" element={<><PriceChart highlight={highlight} />
+          <DeviceCards
+            schedules={schedules}
+            now={now}
+            selectedId={selectedDeviceId}
+            onSelect={(id) => setSelectedDeviceId(id === selectedDeviceId ? null : id)}
+            devices={devices}
+            /></>}/>
+          <Route path="/devices" element={<DevicesPage
+            devices={devices}
+            schedules={schedules}
+            now={now}
+          />} />
+        </Routes>
       </main>
     </div>
   )

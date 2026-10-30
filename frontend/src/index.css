@@ -62,6 +62,32 @@ button {
   font-weight: 700;
 }
 
+.nav-left {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.nav-left .logo {
+  margin-right: 16px;
+}
+
+.nav-link {
+  padding: 6px 12px;
+  border-radius: 6px;
+  color: #52514e;
+  text-decoration: none;
+}
+
+.nav-link:hover {
+  background: #f3f4f6;
+}
+
+.nav-link.active {
+  background: #0b0b0b;
+  color: #fff;
+}
+
 .profile {
   position: relative;
 }
@@ -318,4 +344,189 @@ button {
   color: #898781;
   font-size: 12px;
   font-weight: 400;
+}
+
+/* Devices page */
+.devices-page-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.devices-page-header h1 {
+  margin: 0;
+}
+
+.add-device-btn {
+  display: grid;
+  place-items: center;
+  padding: 2px;
+  border: 1px solid #0b0b0b;
+  border-radius: 6px;
+  background: none;
+  color: #0b0b0b;
+  cursor: pointer;
+}
+
+.add-device-btn:hover {
+  background: #0b0b0b;
+  color: #fff;
+}
+
+.device-page-device-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.device-list-element {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 16px;
+  border: 1px solid #e1e0d9;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.device-list-element:hover {
+  border-color: #c3c2b7;
+}
+
+.device-properties {
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(120px, 1fr) 70px 110px 70px minmax(180px, 1.5fr);
+  align-items: center;
+  gap: 16px;
+  color: #52514e;
+}
+
+.device-properties > span:first-child {
+  font-weight: 600;
+  color: #0b0b0b;
+}
+
+.schedules-field {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.schedule-entries {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-variant-numeric: tabular-nums;
+  color: #0b0b0b;
+}
+
+.device-list-element > button {
+  flex-shrink: 0;
+  padding: 6px 14px;
+  border: 1px solid #e1e0d9;
+  border-radius: 6px;
+  background: none;
+  color: #52514e;
+  cursor: pointer;
+}
+
+.device-list-element > button:hover {
+  background: #f3f4f6;
+}
+
+.edit-menu {
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 10;
+  box-sizing: border-box;
+  width: 360px;
+  max-width: 100%;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  border-left: 1px solid #e1e0d9;
+  background: #fff;
+  box-shadow: -4px 0 12px rgb(0 0 0 / 0.08);
+  overflow-y: auto;
+}
+
+.edit-menu-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.edit-menu-close {
+  padding: 0 6px;
+  border: none;
+  background: none;
+  font-size: 22px;
+  line-height: 1;
+  color: #898781;
+  cursor: pointer;
+}
+
+.edit-menu-close:hover {
+  color: #0b0b0b;
+}
+
+.edit-menu-title {
+  font-size: 13px;
+  color: #898781;
+}
+
+.edit-menu-device-name {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.device-list-header {
+  padding-top: 0;
+  padding-bottom: 0;
+  border-color: transparent;
+  background: none;
+}
+
+.device-list-header:hover {
+  border-color: transparent;
+}
+
+.device-list-header .device-properties > span,
+.device-list-header .device-properties > span:first-child {
+  font-size: 13px;
+  font-weight: 400;
+  color: #898781;
+}
+
+.device-list-header > button {
+  visibility: hidden;
+}
+
+/* Phones: stack the properties instead of a wide row. */
+@media (max-width: 720px) {
+  .device-list-element {
+    align-items: flex-start;
+  }
+
+  .device-properties {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+  }
+
+  .device-properties > span:first-child {
+    width: 100%;
+  }
+
+  /* Rows wrap on phones, so the column labels no longer line up. */
+  .device-list-header {
+    display: none;
+  }
 }

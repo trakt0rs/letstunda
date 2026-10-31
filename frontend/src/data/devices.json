@@ -6,7 +6,8 @@
     "durationMinutes": 360,
     "powerKw": 11,
     "splittable": true,
-    "deadline": "07:00"
+    "runFrom": null,
+    "runUntil": "07:00"
   },
   {
     "id": "washing-machine",
@@ -15,7 +16,8 @@
     "durationMinutes": 120,
     "powerKw": 1,
     "splittable": false,
-    "deadline": null
+    "runFrom": null,
+    "runUntil": null
   },
   {
     "id": "dishwasher",
@@ -24,7 +26,8 @@
     "durationMinutes": 180,
     "powerKw": 0.5,
     "splittable": false,
-    "deadline": null
+    "runFrom": null,
+    "runUntil": null
   },
   {
     "id": "boiler",
@@ -33,6 +36,7 @@
     "durationMinutes": 180,
     "powerKw": 2,
     "splittable": true,
-    "deadline": "18:00"
+    "runFrom": null,
+    "runUntil": "18:00"
   }
 ]

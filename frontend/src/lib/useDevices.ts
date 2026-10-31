@@ -6,6 +6,10 @@ export function useDevices() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
 
+  function updateDevice(updated: Device) {
+    setDevices(devices.map(d => d.id === updated.id ? updated : d))
+  }
+
   useEffect(() => {
     const controller = new AbortController()
 
@@ -24,5 +28,5 @@ export function useDevices() {
     return () => controller.abort()
     }, [])
 
-  return {devices, loading, error}
+  return { devices, loading, error, updateDevice }
 }

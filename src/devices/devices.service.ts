@@ -18,7 +18,8 @@ export class DevicesService {
         durationMinutes: body.durationMinutes,
         powerKw: body.powerKw,
         splittable: body.splittable,
-        deadline: body.deadline,
+        runFrom: body.runFrom,
+        runUntil: body.runUntil,
         userId,
       },
     });

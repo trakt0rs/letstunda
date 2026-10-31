@@ -84,7 +84,8 @@ model Device {
   durationMinutes   Int
   powerKw           Float
   splittable        Boolean
-  deadline          String?
+  runFrom           String?
+  runUntil          String?
   userId            String
   user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 

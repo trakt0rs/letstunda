@@ -4,5 +4,6 @@ export type CreateDeviceDto = {
   durationMinutes: number
   powerKw: number
   splittable: boolean
-  deadline: string | null
+  runFrom: string | null
+  runUntil: string | null
 }

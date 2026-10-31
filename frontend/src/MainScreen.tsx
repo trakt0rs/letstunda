@@ -17,7 +17,7 @@ function MainScreen({ user }: Props) {
   const dropdownRef = useRef<HTMLDivElement>(null)
   const [selectedDeviceId, setSelectedDeviceId] = useState<string | null>(null)
 
-  const { devices } = useDevices();
+  const { devices, updateDevice } = useDevices();
 
   // Best run times per device; the selected device's times are highlighted on the chart.
   const { prices, now } = usePrices(0)
@@ -71,6 +71,7 @@ function MainScreen({ user }: Props) {
             devices={devices}
             schedules={schedules}
             now={now}
+            updateDevice={updateDevice}
           />} />
         </Routes>
       </main>

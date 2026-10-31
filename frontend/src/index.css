@@ -402,6 +402,7 @@ button {
   align-items: center;
   gap: 16px;
   color: #52514e;
+  font-size: 14px;
 }
 
 .device-properties > span:first-child {
@@ -432,6 +433,7 @@ button {
   background: none;
   color: #52514e;
   cursor: pointer;
+  font-size: 14px;
 }
 
 .device-list-element > button:hover {
@@ -529,4 +531,139 @@ button {
   .device-list-header {
     display: none;
   }
+}
+
+.edit-menu-field-name {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #898781;
+}
+
+.edit-menu-input {
+  padding: 8px 10px;
+  border: 1px solid #e1e0d9;
+  border-radius: 6px;
+  font: inherit;
+  font-size: 14px;
+  color: #0b0b0b;
+}
+
+.edit-menu-input:focus {
+  outline: none;
+  border-color: #898781;
+}
+
+.edit-menu-schedule-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.edit-menu-splittable-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+
+}
+
+.edit-menu-schedule-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  border: 1px solid #e1e0d9;
+  border-radius: 8px;
+  font-variant-numeric: tabular-nums;
+}
+
+.edit-menu-schedule-entry {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid lightgray;
+  color: #0b0b0b;
+  align-items: center;
+  /*box-shadow: 0 1px 3px rgb(0 0 0 / 0.3);*/
+}
+
+.edit-menu-entry-text {
+    margin-left: 8px;
+}
+
+.edit-menu-range {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.edit-menu-range > input {
+  flex: 1;
+  min-width: 0;
+}
+
+.edit-menu-error {
+  font-size: 13px;
+  color: #b42318;
+}
+
+.edit-menu-buttons > button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Field-name labels get a top margin; not needed next to the checkbox. */
+.edit-menu-splittable-container .edit-menu-field-name {
+  margin-top: 0;
+}
+
+/* Custom round checkbox: hide the browser look, draw our own. */
+.edit-menu-splittable-container input[type="checkbox"] {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  border: 1.5px solid #c3c2b7;
+  border-radius: 4px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.edit-menu-splittable-container input[type="checkbox"]:checked {
+  border-color: #0b0b0b;
+  background: #0b0b0b url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M6 10.5l2.5 2.5L14 7.5' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 100% no-repeat;
+}
+
+.edit-menu-buttons {
+  display: flex;
+  gap: 8px;
+  margin-top: auto;
+}
+
+.edit-menu-buttons > button {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #e1e0d9;
+  border-radius: 6px;
+  background: #fff;
+  color: #52514e;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.edit-menu-buttons > button:hover {
+  background: #f3f4f6;
+}
+
+/* Saglabāt is the main action. */
+.edit-menu-buttons > button:first-child {
+  border-color: #0b0b0b;
+  background: #0b0b0b;
+  color: #fff;
+}
+
+.edit-menu-buttons > button:first-child:hover {
+  background: #2c2c2a;
 }

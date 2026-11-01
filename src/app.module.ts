@@ -2,7 +2,9 @@ import { Module } from '@nestjs/common';
 import { createObserveModule } from '@nestjs/observe';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
+import { ScheduleModule } from '@nestjs/schedule';
 import { DevicesModule } from './devices/devices.module.js';
+import { PricesModule } from './prices/prices.module.js';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
@@ -16,7 +18,9 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
       runtimeMetrics: !Boolean(process.versions?.['webcontainer']),
       serviceId: 'nest-typescript-starter',
     }),
+    ScheduleModule.forRoot(),
     DevicesModule,
+    PricesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

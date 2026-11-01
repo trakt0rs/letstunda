@@ -10,12 +10,6 @@ export default defineConfig(({ mode }) => {
     server: {
       proxy: {
         '/api': env.API_URL ?? 'http://localhost:3000',
-        // Elering doesn't send CORS headers, so the browser can't call it directly.
-        '/elering': {
-          target: 'https://dashboard.elering.ee',
-          changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/elering/, ''),
-        },
       },
     },
   }

@@ -5,6 +5,8 @@ import { toNodeHandler } from 'better-auth/node';
 import { AppModule, ObserveInstrument } from './app.module.js';
 import { auth } from './lib/auth.js';
 
+process.env.TZ = 'Europe/Riga';
+
 async function bootstrap() {
   // Better Auth reads the raw request body, so its routes are mounted before
   // the JSON body parser.

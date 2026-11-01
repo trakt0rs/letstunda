@@ -1,8 +1,6 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { authClient } from './lib/auth-client'
 import { useDevices } from './lib/useDevices'
-import { bestSchedule } from './lib/schedule'
-import { usePrices } from './lib/usePrices'
 import DeviceCards from './DeviceCards'
 import PriceChart from './PriceChart'
 import { Routes, Route, NavLink } from 'react-router'
@@ -15,18 +13,8 @@ type Props = {
 function MainScreen({ user }: Props) {
   const [open, setOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
-  const [selectedDeviceId, setSelectedDeviceId] = useState<string | null>(null)
 
   const { devices, updateDevice } = useDevices();
-
-  // Best run times per device; the selected device's times are highlighted on the chart.
-  const { prices, now } = usePrices(0)
-  const schedules = useMemo(
-    () => new Map(devices.map((d) => [d.id, bestSchedule(prices, d, now)])),
-    [prices, now, devices],
-  )
-  const selectedWindows = selectedDeviceId ? schedules.get(selectedDeviceId)?.windows : undefined
-  const highlight = selectedDeviceId && selectedWindows ? { id: selectedDeviceId, windows: selectedWindows } : null
 
   useEffect(() => {
     if (!open) return
@@ -59,20 +47,8 @@ function MainScreen({ user }: Props) {
       </nav>
       <main className="content">
         <Routes>
-          <Route path="/" element={<><PriceChart highlight={highlight} />
-          <DeviceCards
-            schedules={schedules}
-            now={now}
-            selectedId={selectedDeviceId}
-            onSelect={(id) => setSelectedDeviceId(id === selectedDeviceId ? null : id)}
-            devices={devices}
-            /></>}/>
-          <Route path="/devices" element={<DevicesPage
-            devices={devices}
-            schedules={schedules}
-            now={now}
-            updateDevice={updateDevice}
-          />} />
+          <Route path="/" element={<><PriceChart /><DeviceCards devices={devices} /></>} />
+          <Route path="/devices" element={<DevicesPage devices={devices} updateDevice={updateDevice} />} />
         </Routes>
       </main>
     </div>

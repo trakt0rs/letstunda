@@ -1,19 +1,14 @@
 import type {Device} from "./lib/devices.ts"
-import { runWindowMinutes, type Schedule } from "./lib/schedule"
 import { useState } from "react"
 import { Plus } from "lucide-react"
-import { formatDuration, windowLabel } from "./lib/format-properties.js"
-
-const MAX_WINDOWS = 1
+import { formatDuration } from "./lib/format-properties.js"
 
 type Props = {
   devices: Device[]
-  schedules: Map<string, Schedule | null>
-  now: number
   updateDevice: (device: Device) => void
 }
 
-export function DevicesPage({ devices, schedules, now, updateDevice }: Props) {
+export function DevicesPage({ devices, updateDevice }: Props) {
   const [editMenuOpen, setEditMenuOpen] = useState<string | null>(null)
   const editedDevice = devices.find(d => d.id === editMenuOpen)
 
@@ -32,7 +27,6 @@ export function DevicesPage({ devices, schedules, now, updateDevice }: Props) {
             <span>Jauda</span>
             <span>Dalāms</span>
             <span>Cikls</span>
-            <span>Darbības laiki</span>
           </div>
           {/* Invisible copy of the Edit button so the columns line up with the rows. */}
           <button aria-hidden="true" tabIndex={-1}>Labot</button>
@@ -40,8 +34,6 @@ export function DevicesPage({ devices, schedules, now, updateDevice }: Props) {
         {devices.map(d => (<DeviceListElement
           key={d.id}
           device={d}
-          schedule={schedules.get(d.id) ?? null}
-          now={now}
           onToggleMenu={() => {
             setEditMenuOpen(d.id === editMenuOpen ? null : d.id)
           }
@@ -54,8 +46,6 @@ export function DevicesPage({ devices, schedules, now, updateDevice }: Props) {
         device={editedDevice}
         onClose={() => setEditMenuOpen(null)}
         onSave={updateDevice}
-        schedule={schedules.get(editedDevice.id) ?? null}
-        now={now}
       />}
     </>
   )
@@ -63,19 +53,10 @@ export function DevicesPage({ devices, schedules, now, updateDevice }: Props) {
 
 type DeviceElProps = {
   device: Device
-  schedule: Schedule | null
-  now: number
   onToggleMenu: () => void
 }
 
-function DeviceListElement({ device, schedule, now, onToggleMenu }: DeviceElProps) {
-  const [expanded, setExpand] = useState(false)
-
-  const visible = !schedule ? [] : expanded ? schedule.windows :
-    schedule.windows.slice(0, MAX_WINDOWS)
-
-  const hidden = schedule ? schedule.windows.length - MAX_WINDOWS : 0
-
+function DeviceListElement({ device, onToggleMenu }: DeviceElProps) {
   return (
     <div className="device-list-element">
       <div className="device-properties">
@@ -83,20 +64,6 @@ function DeviceListElement({ device, schedule, now, onToggleMenu }: DeviceElProp
         <span>{device.powerKw} kW</span>
         <span>{device.splittable ? "Dalāms" : "Nedalāms"}</span>
         <span>{formatDuration(device.durationMinutes)}</span>
-        {schedule ? (
-          <div className="schedules-field" onClick={() => setExpand(!expanded)}>
-            <div className="schedule-entries">{
-              visible.map((w) => (
-                <span key={w.start}>{windowLabel(w, now)}</span>
-              ))}
-            </div>
-            {hidden > 0 && <div className="device-more">{expanded ? "show less" :
-              `expand (${schedule.windows.length})`}</div>}
-          </div>
-        ) : (
-            <span>No Schedule</span>
-        )}
-
       </div>
       <button onClick={() => onToggleMenu()}>Labot</button>
     </div>
@@ -107,8 +74,6 @@ type EditMenuProps = {
   device: Device
   onClose: () => void
   onSave: (device: Device) => void
-  schedule: Schedule | null
-  now: number
 }
 
 function formatInputField(value: string, fallback: number) {
@@ -116,22 +81,14 @@ function formatInputField(value: string, fallback: number) {
   return isNaN(n) ? fallback : n
 }
 
-function EditMenu({ device, schedule, now, onClose, onSave }: EditMenuProps) {
+function EditMenu({ device, onClose, onSave }: EditMenuProps) {
   const [draft, setDraft] = useState(device)
-
-  const shownWindows = !schedule ? [] :
-    draft.splittable ? schedule.windows : schedule.windows.slice(0, 1)
 
   // The cycle is stored in minutes but edited as hours + minutes.
   const hours = Math.floor(draft.durationMinutes / 60)
   const minutes = draft.durationMinutes % 60
 
-  // Both ends or neither, and the window must fit a whole cycle.
-  const rangeError =
-    !draft.runFrom !== !draft.runUntil ? "Norādi abus laikus" :
-    draft.runFrom && draft.runUntil &&
-      runWindowMinutes(draft.runFrom, draft.runUntil) < draft.durationMinutes ? "Īsāks par ciklu" :
-    null
+  const rangeError = !draft.runFrom !== !draft.runUntil ? "Norādi abus laikus" : null
 
   return (
     <div className="edit-menu">
@@ -169,16 +126,6 @@ function EditMenu({ device, schedule, now, onClose, onSave }: EditMenuProps) {
           onChange={e => setDraft({ ...draft, runUntil: e.target.value || null })} />
       </div>
       {rangeError && <div className="edit-menu-error">{rangeError}</div>}
-      <div className="edit-menu-field-name">Darbības laiki</div>
-      <div className="edit-menu-schedule-container">
-        <div>{schedule ? (<div className="edit-menu-schedule-list">{shownWindows
-          .map(w => <span key={w.start} className="edit-menu-schedule-entry">
-            <div className="edit-menu-entry-text">{windowLabel(w, now)}</div>
-          </span>)}
-        </div>) :
-          (<span>No Schedule</span>)}</div>
-
-      </div>
       <div className="edit-menu-buttons">
         <button disabled={!!rangeError} onClick={() => { onSave(draft); onClose() }}>Saglabāt</button>
         <button onClick={() => { onClose() }}>Atcelt</button>

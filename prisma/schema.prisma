@@ -92,3 +92,11 @@ model Device {
   @@index([userId])
   @@map("devices")
 }
+
+model Price {
+  time      DateTime  @id
+  price     Float
+  updatedAt DateTime  @updatedAt
+
+  @@map("prices")
+}

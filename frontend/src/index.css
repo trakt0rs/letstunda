@@ -281,20 +281,6 @@ button {
   border: 1px solid #e1e0d9;
   border-radius: 8px;
   background: #fff;
-  cursor: pointer;
-}
-
-.device-card:hover:not([aria-disabled='true']) {
-  border-color: #c3c2b7;
-}
-
-.device-card.selected {
-  border-color: #1baf7a;
-  box-shadow: 0 0 0 1px #1baf7a;
-}
-
-.device-card[aria-disabled='true'] {
-  cursor: default;
 }
 
 .device-title {
@@ -314,36 +300,10 @@ button {
   font-size: 16px;
 }
 
-.device-windows {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  font-variant-numeric: tabular-nums;
-}
-
-.device-more,
 .device-meta {
   margin: 0;
   color: #898781;
   font-size: 13px;
-}
-
-.device-cost {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  margin: 0;
-  font-size: 20px;
-  font-weight: 600;
-}
-
-.device-cost span {
-  color: #898781;
-  font-size: 12px;
-  font-weight: 400;
 }
 
 /* Devices page */
@@ -398,7 +358,7 @@ button {
 .device-properties {
   flex: 1;
   display: grid;
-  grid-template-columns: minmax(120px, 1fr) 70px 110px 70px minmax(180px, 1.5fr);
+  grid-template-columns: minmax(120px, 1fr) 70px 110px 70px;
   align-items: center;
   gap: 16px;
   color: #52514e;
@@ -407,21 +367,6 @@ button {
 
 .device-properties > span:first-child {
   font-weight: 600;
-  color: #0b0b0b;
-}
-
-.schedules-field {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  cursor: pointer;
-}
-
-.schedule-entries {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  font-variant-numeric: tabular-nums;
   color: #0b0b0b;
 }
 
@@ -553,44 +498,12 @@ button {
   border-color: #898781;
 }
 
-.edit-menu-schedule-container {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  font-size: 14px;
-}
-
 .edit-menu-splittable-container {
   display: flex;
   align-items: center;
   gap: 8px;
   margin-top: 8px;
 
-}
-
-.edit-menu-schedule-list {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 10px;
-  border: 1px solid #e1e0d9;
-  border-radius: 8px;
-  font-variant-numeric: tabular-nums;
-}
-
-.edit-menu-schedule-entry {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  padding: 8px;
-  border-radius: 6px;
-  border: 1px solid lightgray;
-  color: #0b0b0b;
-  align-items: center;
-  /*box-shadow: 0 1px 3px rgb(0 0 0 / 0.3);*/
-}
-
-.edit-menu-entry-text {
-    margin-left: 8px;
 }
 
 .edit-menu-range {

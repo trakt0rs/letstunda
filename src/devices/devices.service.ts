@@ -24,4 +24,9 @@ export class DevicesService {
       },
     });
   }
+  deleteDevice(userId: string, id: string) {
+    return prisma.device.delete({
+      where: { id, userId },
+    });
+  }
 }

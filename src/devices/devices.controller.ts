@@ -1,4 +1,4 @@
-import { Controller, Get, Req, Post, Body, UnauthorizedException } from '@nestjs/common';
+import { Controller, Get, Req, Post, Body, Delete, Param, UnauthorizedException } from '@nestjs/common';
 import { auth } from "../lib/auth.js";
 import { fromNodeHeaders } from 'better-auth/node';
 import type { Request } from "express";
@@ -21,5 +21,12 @@ export class DevicesController {
     const session = await auth.api.getSession({ headers: fromNodeHeaders(req.headers) });
     if (!session) throw new UnauthorizedException();
     return this.devicesService.addDevice(session.user.id, body);
+  }
+
+  @Delete(':id')
+  async deleteDevice(@Req() req: Request, @Param('id') id: string) {
+    const session = await auth.api.getSession({ headers: fromNodeHeaders(req.headers) });
+    if (!session) throw new UnauthorizedException();
+    return this.devicesService.deleteDevice(session.user.id, id);
   }
 }

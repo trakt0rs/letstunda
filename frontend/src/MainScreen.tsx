@@ -14,7 +14,7 @@ function MainScreen({ user }: Props) {
   const [open, setOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
-  const { devices, updateDevice } = useDevices();
+  const { devices, updateDevice, deleteDevice } = useDevices();
 
   useEffect(() => {
     if (!open) return
@@ -48,7 +48,11 @@ function MainScreen({ user }: Props) {
       <main className="content">
         <Routes>
           <Route path="/" element={<><PriceChart /><DeviceCards devices={devices} /></>} />
-          <Route path="/devices" element={<DevicesPage devices={devices} updateDevice={updateDevice} />} />
+          <Route path="/devices" element={<DevicesPage
+            devices={devices}
+            updateDevice={updateDevice}
+            deleteDevice={deleteDevice}
+          />} />
         </Routes>
       </main>
     </div>

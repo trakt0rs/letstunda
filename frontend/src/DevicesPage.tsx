@@ -1,14 +1,15 @@
 import type {Device} from "./lib/devices.ts"
 import { useState } from "react"
-import { Plus } from "lucide-react"
+import { Plus, Trash2 } from "lucide-react"
 import { formatDuration } from "./lib/format-properties.js"
 
 type Props = {
   devices: Device[]
   updateDevice: (device: Device) => void
+  deleteDevice: (id: String) => void
 }
 
-export function DevicesPage({ devices, updateDevice }: Props) {
+export function DevicesPage({ devices, updateDevice, deleteDevice }: Props) {
   const [editMenuOpen, setEditMenuOpen] = useState<string | null>(null)
   const editedDevice = devices.find(d => d.id === editMenuOpen)
 
@@ -30,6 +31,7 @@ export function DevicesPage({ devices, updateDevice }: Props) {
           </div>
           {/* Invisible copy of the Edit button so the columns line up with the rows. */}
           <button aria-hidden="true" tabIndex={-1}>Labot</button>
+          <button aria-hidden="true" tabIndex={-1}><Trash2 size={16} /></button>
         </div>
         {devices.map(d => (<DeviceListElement
           key={d.id}
@@ -38,6 +40,7 @@ export function DevicesPage({ devices, updateDevice }: Props) {
             setEditMenuOpen(d.id === editMenuOpen ? null : d.id)
           }
           }
+          onDeleteDevice={() => deleteDevice(d.id)}
         />
         ))}
       </div>
@@ -54,9 +57,10 @@ export function DevicesPage({ devices, updateDevice }: Props) {
 type DeviceElProps = {
   device: Device
   onToggleMenu: () => void
+  onDeleteDevice: () => void
 }
 
-function DeviceListElement({ device, onToggleMenu }: DeviceElProps) {
+function DeviceListElement({ device, onToggleMenu, onDeleteDevice }: DeviceElProps) {
   return (
     <div className="device-list-element">
       <div className="device-properties">
@@ -66,6 +70,11 @@ function DeviceListElement({ device, onToggleMenu }: DeviceElProps) {
         <span>{formatDuration(device.durationMinutes)}</span>
       </div>
       <button onClick={() => onToggleMenu()}>Labot</button>
+      <button onClick={() => {
+        if (confirm(`Dzēst "${device.name}"?`))
+          onDeleteDevice()
+      }}
+      aria-label="Dzēst"><Trash2 size={16} /></button>
     </div>
   )
 }

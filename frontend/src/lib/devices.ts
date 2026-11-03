@@ -8,3 +8,5 @@ export type Device = {
   runFrom: string | null
   runUntil: string | null
 }
+
+export type NewDevice = Omit<Device, "id">

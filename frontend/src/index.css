@@ -289,7 +289,9 @@ button {
   gap: 12px;
 }
 
-.device-title img {
+.device-title svg {
+  color: #2a78d6;
+  flex-shrink: 0;
   padding: 6px;
   border-radius: 8px;
   background: #cde2fb;
@@ -591,11 +593,19 @@ button {
   background: rgb(11 11 11 / 0.35);
 }
 
+/* Wraps the + button so the popup can be positioned right below it. */
+.add-device-anchor {
+  position: relative;
+}
+
 .add-device-popup {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 20;
   box-sizing: border-box;
-  width: 420px;
-  max-width: 100%;
-  max-height: calc(100dvh - 32px);
+  width: 320px;
+  max-width: calc(100vw - 32px);
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -607,7 +617,27 @@ button {
   overflow-y: auto;
 }
 
+.add-device-popup-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 .add-device-popup-title {
   font-size: 16px;
   font-weight: 600;
+}
+
+.add-device-popup-close {
+  display: grid;
+  place-items: center;
+  padding: 2px;
+  border: none;
+  background: none;
+  color: #898781;
+  cursor: pointer;
+}
+
+.add-device-popup-close:hover {
+  color: #0b0b0b;
 }

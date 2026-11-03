@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import type { Device } from "./devices"
+import type { Device, NewDevice } from "./devices"
 
 export function useDevices() {
   const [devices, setDevices] = useState<Device[]>([])
@@ -14,6 +14,17 @@ export function useDevices() {
     const res = await fetch(`/api/devices/${id}`, { method: "DELETE" })
     if (!res.ok) setError("Could not delete a device")
     setDevices(prev => prev.filter(d => d.id !== id))
+  }
+
+  async function addDevice(newDevice: NewDevice) {
+    const res = await fetch("/api/devices", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newDevice),
+      })
+    if (!res.ok) { setError("Could not add a new device"); return }
+    const saved: Device = await res.json()
+    setDevices(prev => [...prev, saved])
   }
 
   useEffect(() => {
@@ -34,5 +45,5 @@ export function useDevices() {
     return () => controller.abort()
     }, [])
 
-  return { devices, loading, error, updateDevice, deleteDevice }
+  return { devices, loading, error, updateDevice, deleteDevice, addDevice }
 }

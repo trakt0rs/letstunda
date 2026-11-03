@@ -14,7 +14,7 @@ function MainScreen({ user }: Props) {
   const [open, setOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
-  const { devices, updateDevice, deleteDevice } = useDevices();
+  const { devices, updateDevice, deleteDevice, addDevice } = useDevices();
 
   useEffect(() => {
     if (!open) return
@@ -52,6 +52,7 @@ function MainScreen({ user }: Props) {
             devices={devices}
             updateDevice={updateDevice}
             deleteDevice={deleteDevice}
+            addDevice={addDevice}
           />} />
         </Routes>
       </main>

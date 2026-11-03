@@ -1,3 +1,4 @@
+import { Plug } from 'lucide-react'
 import type { Device } from './lib/devices'
 import { formatDuration } from './lib/format-properties.js'
 
@@ -13,7 +14,7 @@ function DeviceCards({ devices }: Props) {
         {devices.map((device) => (
           <article key={device.id} className="device-card">
             <div className="device-title">
-              <img src={device.image} alt="" width={40} height={40} />
+              <Plug size={28} strokeWidth={1.5} />
               <h3>{device.name}</h3>
             </div>
             <p className="device-meta">

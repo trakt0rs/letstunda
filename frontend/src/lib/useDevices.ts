@@ -10,7 +10,7 @@ export function useDevices() {
     setDevices(devices.map(d => d.id === updated.id ? updated : d))
   }
 
-  async function deleteDevice(id: String) {
+  async function deleteDevice(id: string) {
     const res = await fetch(`/api/devices/${id}`, { method: "DELETE" })
     if (!res.ok) setError("Could not delete a device")
     setDevices(prev => prev.filter(d => d.id !== id))

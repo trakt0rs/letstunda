@@ -6,20 +6,26 @@ import { formatDuration } from "./lib/format-properties.js"
 type Props = {
   devices: Device[]
   updateDevice: (device: Device) => void
-  deleteDevice: (id: String) => void
+  deleteDevice: (id: string) => void
 }
 
 export function DevicesPage({ devices, updateDevice, deleteDevice }: Props) {
   const [editMenuOpen, setEditMenuOpen] = useState<string | null>(null)
   const editedDevice = devices.find(d => d.id === editMenuOpen)
+  const [popupOpen, setPopupOpen] = useState(false)
 
   return (
     <>
       <div className="devices-page-header">
         <h1>My Devices</h1>
-        <button className="add-device-btn" aria-label="Pievienot" title="Pievienot">
+        <button className="add-device-btn" onClick={() =>
+          setPopupOpen(!popupOpen)
+        }
+          aria-label="Pievienot" title="Pievienot">
           <Plus size={18} />
         </button>
+        {popupOpen && <AddDevicePopup onClose={() => setPopupOpen(false)} />}
+
       </div>
       <div className="device-page-device-list">
         <div className="device-list-element device-list-header">
@@ -88,6 +94,21 @@ type EditMenuProps = {
 function formatInputField(value: string, fallback: number) {
   const n = Number(value)
   return isNaN(n) ? fallback : n
+}
+
+type AddPopupProps = {
+  onClose: () => void
+}
+
+function AddDevicePopup({ onClose }: AddPopupProps) {
+  return (
+    <>
+      <div className="add-device-popup">
+        Hello World
+      </div>
+      <button className="close-btn" onClick={() => onClose()}>x</button>
+    </>
+  )
 }
 
 function EditMenu({ device, onClose, onSave }: EditMenuProps) {

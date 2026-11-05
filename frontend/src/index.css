@@ -281,6 +281,79 @@ button {
   border: 1px solid #e1e0d9;
   border-radius: 8px;
   background: #fff;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.device-card:hover {
+  border-color: #c3c2b7;
+}
+
+.device-card.selected {
+  border-color: #1baf7a;
+  box-shadow: 0 0 0 1px #1baf7a;
+}
+
+.schedule-options {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+
+.schedule-options li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.schedule-rank {
+  display: inline-grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #1baf7a;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.schedule-times {
+  flex: 1;
+}
+
+.schedule-rating {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+}
+
+.schedule-rating.cheap {
+  background: #d6f2e6;
+  color: #0e7a52;
+}
+
+.schedule-rating.normal {
+  background: #eeede8;
+  color: #52514e;
+}
+
+.schedule-rating.expensive {
+  background: #fbe0dc;
+  color: #b3261e;
+}
+
+.schedule-none {
+  margin: 12px 0 0;
+  color: #898781;
+  font-size: 14px;
 }
 
 .device-title {

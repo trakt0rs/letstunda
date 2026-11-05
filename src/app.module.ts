@@ -5,6 +5,7 @@ import { AppService } from './app.service.js';
 import { ScheduleModule } from '@nestjs/schedule';
 import { DevicesModule } from './devices/devices.module.js';
 import { PricesModule } from './prices/prices.module.js';
+import { SchedulesModule } from './schedules/schedules.module.js';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
@@ -21,6 +22,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     ScheduleModule.forRoot(),
     DevicesModule,
     PricesModule,
+    SchedulesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

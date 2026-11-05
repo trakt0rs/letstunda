@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { authClient } from './lib/auth-client'
 import { useDevices } from './lib/useDevices'
+import { useSchedules } from './lib/useSchedules'
 import DeviceCards from './DeviceCards'
 import PriceChart from './PriceChart'
 import { Routes, Route, NavLink } from 'react-router'
@@ -15,6 +16,8 @@ function MainScreen({ user }: Props) {
   const dropdownRef = useRef<HTMLDivElement>(null)
 
   const { devices, updateDevice, deleteDevice, addDevice } = useDevices();
+  const schedules = useSchedules(devices)
+  const [selectedId, setSelectedId] = useState<string | null>(null)
 
   useEffect(() => {
     if (!open) return
@@ -47,7 +50,14 @@ function MainScreen({ user }: Props) {
       </nav>
       <main className="content">
         <Routes>
-          <Route path="/" element={<><PriceChart /><DeviceCards devices={devices} /></>} />
+          <Route path="/" element={<>
+            <PriceChart options={selectedId ? schedules.get(selectedId) : undefined} />
+            <DeviceCards
+              devices={devices}
+              selectedId={selectedId}
+              onSelect={(id) => setSelectedId(id === selectedId ? null : id)}
+            />
+          </>} />
           <Route path="/devices" element={<DevicesPage
             devices={devices}
             updateDevice={updateDevice}

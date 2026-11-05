@@ -3,6 +3,7 @@ import {
   Area,
   AreaChart,
   CartesianGrid,
+  ReferenceArea,
   ReferenceLine,
   ResponsiveContainer,
   Tooltip,
@@ -11,10 +12,17 @@ import {
 } from 'recharts'
 import { dailyAverages, formatDay, formatTime, type PricePoint } from './lib/prices'
 import { usePrices } from './lib/usePrices'
+import type { ScheduleOption } from './lib/useSchedules'
 
 const formatPrice = (price: number) => price.toFixed(4)
 
-function PriceChart() {
+const OPTION_OPACITY = [0.35, 0.26, 0.19, 0.13, 0.08]
+
+type Props = {
+  options: ScheduleOption[] | undefined
+}
+
+function PriceChart({ options }: Props) {
   const [showMonth, setShowMonth] = useState(false)
   const upcoming = usePrices('upcoming')
   const month = usePrices(showMonth ? 'month' : null)
@@ -82,6 +90,21 @@ function PriceChart() {
               <Tooltip
                 content={({ active, payload }) => <PriceTooltip active={active} payload={payload} daily={showMonth} />}
               />
+              {!showMonth &&
+                options?.flatMap((option, rank) =>
+                  option.windows.map((w) => (
+                    <ReferenceArea
+                      key={`${rank}-${w.start}`}
+                      x1={w.start}
+                      x2={w.end}
+                      ifOverflow="hidden"
+                      fill="#1baf7a"
+                      fillOpacity={OPTION_OPACITY[rank]}
+                      stroke="none"
+                      label={{ value: rank + 1, position: 'insideTop', fill: '#0e7a52', fontSize: 12 }}
+                    />
+                  )),
+                )}
               {!showMonth && <ReferenceLine x={now} stroke="#898781" strokeDasharray="4 4" />}
               <Area
                 type="monotone"
@@ -96,6 +119,25 @@ function PriceChart() {
           </ResponsiveContainer>
           {!loading && points.length === 0 && <p className="empty">No prices available</p>}
         </div>
+      )}
+
+      {!showMonth && options && (
+        options.length === 0 ? (
+          <p className="schedule-none">No run fits the known prices yet</p>
+        ) : (
+          <ol className="schedule-options">
+            {options.map((option, rank) => (
+              <li key={rank}>
+                <span className="schedule-rank">{rank + 1}</span>
+                <span className="schedule-times">
+                  {option.windows.map((w) => `${formatDay(w.start)} ${formatTime(w.start)}–${formatTime(w.end)}`).join(', ')}
+                </span>
+                <strong>{option.cost.toFixed(2)} €</strong>
+                {option.rating && <span className={`schedule-rating ${option.rating}`}>{option.rating}</span>}
+              </li>
+            ))}
+          </ol>
+        )
       )}
     </section>
   )

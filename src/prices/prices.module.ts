@@ -7,5 +7,6 @@ import { EleringClient } from './elering.client.js';
 @Module({
   controllers: [PricesController],
   providers: [PricesService, PricesSync, EleringClient],
+  exports: [PricesService],
 })
 export class PricesModule {}

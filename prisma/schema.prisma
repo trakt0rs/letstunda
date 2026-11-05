@@ -88,6 +88,7 @@ model Device {
   runUntil          String?
   userId            String
   user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  schedule          Schedule?
 
   @@index([userId])
   @@map("devices")
@@ -99,4 +100,12 @@ model Price {
   updatedAt DateTime  @updatedAt
 
   @@map("prices")
+}
+
+model Schedule {
+  deviceId  String    @id
+  device    Device    @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  options   Json
+
+  @@map("schedules")
 }

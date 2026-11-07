@@ -147,11 +147,11 @@ button {
   max-width: 1200px;
   margin: 0 auto;
   padding: 24px 16px;
+  overflow-y: auto;
 }
 
 .prices {
   flex: 1;
-  min-height: 0;
   display: flex;
   flex-direction: column;
 }
@@ -292,8 +292,7 @@ button {
 }
 
 .device-card.selected {
-  border-color: #1baf7a;
-  box-shadow: 0 0 0 1px #1baf7a;
+  border: 2px solid #1baf7a;
 }
 
 .schedule-options {
@@ -433,7 +432,7 @@ button {
 .device-properties {
   flex: 1;
   display: grid;
-  grid-template-columns: minmax(120px, 1fr) 70px 110px 70px;
+  grid-template-columns: minmax(120px, 1fr) 70px 110px 50px 140px;
   align-items: center;
   gap: 16px;
   color: #52514e;

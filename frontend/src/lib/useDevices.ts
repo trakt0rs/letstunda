@@ -6,17 +6,13 @@ export function useDevices() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
 
-  function updateDevice(updated: Device) {
-    setDevices(devices.map(d => d.id === updated.id ? updated : d))
-  }
-
   async function deleteDevice(id: string) {
     const res = await fetch(`/api/devices/${id}`, { method: "DELETE" })
-    if (!res.ok) setError("Could not delete a device")
+    if (!res.ok) setError("Could not delete device")
     setDevices(prev => prev.filter(d => d.id !== id))
   }
 
-  async function addDevice(newDevice: NewDevice) {
+  async function addDevice(newDevice: NewDevice) { // NewDevice is a device object without id
     const res = await fetch("/api/devices", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -25,6 +21,19 @@ export function useDevices() {
     if (!res.ok) { setError("Could not add a new device"); return }
     const saved: Device = await res.json()
     setDevices(prev => [...prev, saved])
+  }
+
+  async function updateDevice(updated: Device) {
+    const res = await fetch(`/api/devices/${updated.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updated)
+    })
+    if (!res.ok) {
+      setError("Could not update device"); return
+    }
+    const saved: Device = await res.json()
+    setDevices(prev => prev.map(d => d.id === saved.id ? saved : d))
   }
 
   useEffect(() => {

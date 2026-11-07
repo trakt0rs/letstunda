@@ -63,6 +63,7 @@ function MainScreen({ user }: Props) {
             updateDevice={updateDevice}
             deleteDevice={deleteDevice}
             addDevice={addDevice}
+            schedules={schedules}
           />} />
         </Routes>
       </main>

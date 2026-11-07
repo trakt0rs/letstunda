@@ -1,16 +1,19 @@
 import type { Device, NewDevice } from "./lib/devices.ts"
 import { useEffect, useRef, useState } from "react"
 import { Plus, Trash2, X } from "lucide-react"
+import type { ScheduleOption } from "./lib/useSchedules"
 import { formatDuration } from "./lib/format-properties.js"
+import { formatDay, formatTime } from "./lib/prices.ts"
 
 type Props = {
   devices: Device[]
   updateDevice: (device: Device) => void
   deleteDevice: (id: string) => void
   addDevice: (device: NewDevice) => void
+  schedules: Map<string, ScheduleOption[]>
 }
 
-export function DevicesPage({ devices, updateDevice, deleteDevice, addDevice }: Props) {
+export function DevicesPage({ schedules, devices, updateDevice, deleteDevice, addDevice }: Props) {
   const [editMenuOpen, setEditMenuOpen] = useState<string | null>(null)
   const editedDevice = devices.find(d => d.id === editMenuOpen)
   const [popupOpen, setPopupOpen] = useState(false)
@@ -48,6 +51,7 @@ export function DevicesPage({ devices, updateDevice, deleteDevice, addDevice }: 
             <span>Jauda</span>
             <span>Patēriņa režīms</span>
             <span>Cikls</span>
+            <span>Tuvākie darbības laiki</span>
           </div>
           {/* Invisible copy of the Edit button so the columns line up with the rows. */}
           <button aria-hidden="true" tabIndex={-1}>Labot</button>
@@ -59,6 +63,7 @@ export function DevicesPage({ devices, updateDevice, deleteDevice, addDevice }: 
             device={d}
             onToggleMenu={() => setEditMenuOpen(d.id === editMenuOpen ? null : d.id)}
             onDeleteDevice={() => deleteDevice(d.id)}
+            options={schedules.get(d.id)}
           />
         ))}
       </div>
@@ -76,9 +81,12 @@ type DeviceElProps = {
   device: Device
   onToggleMenu: () => void
   onDeleteDevice: () => void
+  options: ScheduleOption[] | undefined
 }
 
-function DeviceListElement({ device, onToggleMenu, onDeleteDevice }: DeviceElProps) {
+function DeviceListElement({ options, device, onToggleMenu, onDeleteDevice }: DeviceElProps) {
+  const next = options?.flatMap(o => o.windows).sort((a, b) => a.start - b.start)[0]
+
   return (
     <div className="device-list-element">
       <div className="device-properties">
@@ -86,6 +94,11 @@ function DeviceListElement({ device, onToggleMenu, onDeleteDevice }: DeviceElPro
         <span>{device.powerKw} kW</span>
         <span>{device.splittable ? "Dalāms" : "Nedalāms"}</span>
         <span>{formatDuration(device.durationMinutes)}</span>
+        <span>
+          {next
+            ? `${formatDay(next.start)} ${formatTime(next.start)} - ${formatTime(next.end)}`
+            : "-"}
+        </span>
       </div>
       <button onClick={onToggleMenu}>Labot</button>
       <button aria-label="Dzēst" title="Dzēst" onClick={() => {

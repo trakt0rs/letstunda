@@ -1,9 +1,12 @@
+import { useEffect, useMemo, useState, type FormEvent } from "react"
+import { ChevronDown, Pencil, Plug, Plus, Trash2, X } from "lucide-react"
+import { Area, AreaChart, ReferenceArea, ResponsiveContainer, XAxis, YAxis } from "recharts"
 import type { Device, NewDevice } from "./lib/devices.ts"
-import { useEffect, useRef, useState } from "react"
-import { Plus, Trash2, X } from "lucide-react"
 import type { ScheduleOption } from "./lib/useSchedules"
 import { formatDuration } from "./lib/format-properties.js"
-import { formatDay, formatTime } from "./lib/prices.ts"
+import { dayLabel, formatTime, type PricePoint } from "./lib/prices.ts"
+import { usePrices } from "./lib/usePrices"
+import OptionList from "./OptionList"
 
 type Props = {
   devices: Device[]
@@ -13,106 +16,16 @@ type Props = {
   schedules: Map<string, ScheduleOption[]>
 }
 
-export function DevicesPage({ schedules, devices, updateDevice, deleteDevice, addDevice }: Props) {
-  const [editMenuOpen, setEditMenuOpen] = useState<string | null>(null)
-  const editedDevice = devices.find(d => d.id === editMenuOpen)
-  const [popupOpen, setPopupOpen] = useState(false)
-  const anchorRef = useRef<HTMLDivElement>(null)
+type Sheet = { mode: "add" } | { mode: "edit"; device: Device }
 
-  // Close the popup when clicking anywhere outside the + button and popup.
-  useEffect(() => {
-    if (!popupOpen) return
-    function handleClick(e: MouseEvent) {
-      if (!anchorRef.current?.contains(e.target as Node)) setPopupOpen(false)
-    }
-    document.addEventListener("mousedown", handleClick)
-    return () => document.removeEventListener("mousedown", handleClick)
-  }, [popupOpen])
-
-  return (
-    <>
-      <div className="devices-page-header">
-        <h1>Manas ierīces</h1>
-        <div className="add-device-anchor" ref={anchorRef}>
-          <button className="add-device-btn" onClick={() => setPopupOpen(!popupOpen)}
-            aria-label="Pievienot" title="Pievienot">
-            <Plus size={18} />
-          </button>
-          {popupOpen && <AddDevicePopup
-            onClose={() => setPopupOpen(false)}
-            onSave={addDevice}
-          />}
-        </div>
-      </div>
-      <div className="device-page-device-list">
-        <div className="device-list-element device-list-header">
-          <div className="device-properties">
-            <span>Nosaukums</span>
-            <span>Jauda</span>
-            <span>Patēriņa režīms</span>
-            <span>Cikls</span>
-            <span>Tuvākie darbības laiki</span>
-          </div>
-          {/* Invisible copy of the Edit button so the columns line up with the rows. */}
-          <button aria-hidden="true" tabIndex={-1}>Labot</button>
-          <button aria-hidden="true" tabIndex={-1}><Trash2 size={16} /></button>
-        </div>
-        {devices.map(d => (
-          <DeviceListElement
-            key={d.id}
-            device={d}
-            onToggleMenu={() => setEditMenuOpen(d.id === editMenuOpen ? null : d.id)}
-            onDeleteDevice={() => deleteDevice(d.id)}
-            options={schedules.get(d.id)}
-          />
-        ))}
-      </div>
-      {editedDevice && <EditMenu
-        key={editedDevice.id}
-        device={editedDevice}
-        onClose={() => setEditMenuOpen(null)}
-        onSave={updateDevice}
-      />}
-    </>
-  )
-}
-
-type DeviceElProps = {
-  device: Device
-  onToggleMenu: () => void
-  onDeleteDevice: () => void
-  options: ScheduleOption[] | undefined
-}
-
-function DeviceListElement({ options, device, onToggleMenu, onDeleteDevice }: DeviceElProps) {
-  const next = options?.flatMap(o => o.windows).sort((a, b) => a.start - b.start)[0]
-
-  return (
-    <div className="device-list-element">
-      <div className="device-properties">
-        <span>{device.name}</span>
-        <span>{device.powerKw} kW</span>
-        <span>{device.splittable ? "Dalāms" : "Nedalāms"}</span>
-        <span>{formatDuration(device.durationMinutes)}</span>
-        <span>
-          {next
-            ? `${formatDay(next.start)} ${formatTime(next.start)} - ${formatTime(next.end)}`
-            : "-"}
-        </span>
-      </div>
-      <button onClick={onToggleMenu}>Labot</button>
-      <button aria-label="Dzēst" title="Dzēst" onClick={() => {
-        if (confirm(`Dzēst "${device.name}"?`)) onDeleteDevice()
-      }}>
-        <Trash2 size={16} />
-      </button>
-    </div>
-  )
-}
-
-function formatInputField(value: string, fallback: number) {
-  const n = Number(value)
-  return isNaN(n) ? fallback : n
+const EMPTY_DEVICE: NewDevice = {
+  name: "",
+  image: "",
+  powerKw: 0,
+  durationMinutes: 0,
+  splittable: false,
+  runFrom: null,
+  runUntil: null,
 }
 
 function toMinutes(time: string) {
@@ -125,158 +38,360 @@ function intervalMinutes(from: string, until: string) {
   return diff >= 0 ? diff : diff + 24 * 60
 }
 
-// Checks shared by the add popup and the edit menu.
-function getErrors(draft: NewDevice) {
-  const rangeError = !draft.runFrom !== !draft.runUntil ? "Norādi abus laikus" : null
-  const durationMinutesError =
-    draft.runFrom && draft.runUntil &&
-    draft.durationMinutes > intervalMinutes(draft.runFrom, draft.runUntil)
-      ? "Cikls neietilpst laikā"
-      : null
-  return { rangeError, durationMinutesError }
-}
+export function DevicesPage({ schedules, devices, updateDevice, deleteDevice, addDevice }: Props) {
+  const [sheet, setSheet] = useState<Sheet | null>(null)
+  const { prices, now } = usePrices("upcoming")
+  const upcoming = useMemo(() => prices.filter(p => p.end > now), [prices, now])
 
-type AddPopupProps = {
-  onClose: () => void
-  onSave: (device: NewDevice) => void
-}
-
-function AddDevicePopup({ onClose, onSave }: AddPopupProps) {
-  const [draft, setDraft] = useState<NewDevice>({
-    name: "",
-    image: "",
-    powerKw: 0,
-    durationMinutes: 0,
-    splittable: false,
-    runFrom: null,
-    runUntil: null,
-  })
-  const [nameTouched, setNameTouched] = useState(false)
-
-  // The cycle is stored in minutes but edited as hours + minutes.
-  const hours = Math.floor(draft.durationMinutes / 60)
-  const minutes = draft.durationMinutes % 60
-
-  const nameError = !draft.name.trim() ? "Lūdzu ievadiet nosaukumu" : null
-  const { rangeError, durationMinutesError } = getErrors(draft)
+  function confirmDelete(device: Device) {
+    if (!confirm(`Dzēst "${device.name}"?`)) return false
+    deleteDevice(device.id)
+    return true
+  }
 
   return (
-    <div className="add-device-popup">
-      <div className="add-device-popup-header">
-        <div className="add-device-popup-title">Jauna ierīce</div>
-        <button className="add-device-popup-close" onClick={onClose} aria-label="Aizvērt">
-          <X size={18} />
+    <div className="devices-page">
+      <header className="page-head">
+        <div>
+          <p className="market-label">Tavas ierīces</p>
+          <div className="market-price">
+            <strong>{devices.length}</strong>
+            <span>{devices.length === 1 ? "ierīce" : "ierīces"}</span>
+          </div>
+        </div>
+        <button className="button-primary" onClick={() => setSheet({ mode: "add" })}>
+          <Plus size={18} strokeWidth={2.5} />
+          Pievienot ierīci
         </button>
-      </div>
+      </header>
 
-      <div className="edit-menu-field-name">Nosaukums</div>
-      <input className="edit-menu-input"
-        onChange={e => setDraft({ ...draft, name: e.target.value })}
-        onBlur={() => setNameTouched(true)} />
-      {nameTouched && nameError && <div className="edit-menu-error">{nameError}</div>}
+      {devices.length === 0 ? (
+        <div className="empty-card">
+          <span className="empty-icon">
+            <Plug size={28} strokeWidth={1.75} />
+          </span>
+          <h2>Vēl nav nevienas ierīces</h2>
+          <p>Pievieno ierīci, un mēs atradīsim lētāko laiku tās darbināšanai.</p>
+          <button className="button-primary" onClick={() => setSheet({ mode: "add" })}>
+            <Plus size={18} strokeWidth={2.5} />
+            Pievienot ierīci
+          </button>
+        </div>
+      ) : (
+        <div className="appliance-grid">
+          {devices.map(device => (
+            <ApplianceCard
+              key={device.id}
+              device={device}
+              options={schedules.get(device.id)}
+              prices={upcoming}
+              onEdit={() => setSheet({ mode: "edit", device })}
+              onDelete={() => confirmDelete(device)}
+            />
+          ))}
+        </div>
+      )}
 
-      <div className="edit-menu-field-name">Jauda (kW)</div>
-      <input className="edit-menu-input"
-        onChange={e => setDraft({ ...draft, powerKw: formatInputField(e.target.value, draft.powerKw) })} />
-
-      <div className="edit-menu-field-name">Cikls</div>
-      <div className="edit-menu-range">
-        <input type="number" min={0} className="edit-menu-input"
-          onChange={e => setDraft({ ...draft, durationMinutes: formatInputField(e.target.value, hours) * 60 + minutes })} />
-        <span>h</span>
-        <input type="number" min={0} max={59} className="edit-menu-input"
-          onChange={e => setDraft({ ...draft, durationMinutes: hours * 60 + formatInputField(e.target.value, minutes) })} />
-        <span>min</span>
-      </div>
-
-      <div className="edit-menu-splittable-container">
-        <div className="edit-menu-field-name">Vai patēriņš dalāms?</div>
-        <input type="checkbox"
-          onChange={e => setDraft({ ...draft, splittable: e.target.checked })} />
-      </div>
-
-      <div className="edit-menu-field-name">Atļautais laiks</div>
-      <div className="edit-menu-range">
-        <input type="time" step={900} className="edit-menu-input"
-          onChange={e => setDraft({ ...draft, runFrom: e.target.value || null })} />
-        <span>–</span>
-        <input type="time" step={900} className="edit-menu-input"
-          onChange={e => setDraft({ ...draft, runUntil: e.target.value || null })} />
-      </div>
-      {rangeError && <div className="edit-menu-error">{rangeError}</div>}
-      {durationMinutesError && <div className="edit-menu-error">{durationMinutesError}</div>}
-
-      <div className="edit-menu-buttons">
-        <button disabled={!!nameError || !!rangeError || !!durationMinutesError}
-          onClick={() => { onSave(draft); onClose() }}>Pievienot</button>
-        <button onClick={onClose}>Atcelt</button>
-      </div>
+      {sheet && (
+        <DeviceSheet
+          key={sheet.mode === "edit" ? sheet.device.id : "new"}
+          initial={sheet.mode === "edit" ? sheet.device : EMPTY_DEVICE}
+          title={sheet.mode === "edit" ? "Labot ierīci" : "Jauna ierīce"}
+          submitLabel={sheet.mode === "edit" ? "Saglabāt" : "Pievienot"}
+          onClose={() => setSheet(null)}
+          onSave={draft => (sheet.mode === "edit" ? updateDevice({ ...sheet.device, ...draft }) : addDevice(draft))}
+          onDelete={sheet.mode === "edit" ? () => confirmDelete(sheet.device) : undefined}
+        />
+      )}
     </div>
   )
 }
 
-type EditMenuProps = {
+type CardProps = {
   device: Device
-  onClose: () => void
-  onSave: (device: Device) => void
+  options: ScheduleOption[] | undefined
+  prices: PricePoint[]
+  onEdit: () => void
+  onDelete: () => void
 }
 
-function EditMenu({ device, onClose, onSave }: EditMenuProps) {
-  const [draft, setDraft] = useState(device)
-
-  // The cycle is stored in minutes but edited as hours + minutes.
-  const hours = Math.floor(draft.durationMinutes / 60)
-  const minutes = draft.durationMinutes % 60
-
-  const { rangeError, durationMinutesError } = getErrors(draft)
+function ApplianceCard({ device, options, prices, onEdit, onDelete }: CardProps) {
+  const [expanded, setExpanded] = useState(false)
+  const best = options?.[0]
+  const start = best?.windows[0].start
 
   return (
-    <div className="edit-menu">
-      <div className="edit-menu-header">
-        <div className="edit-menu-title">Labot ierīces datus</div>
-        <button className="edit-menu-close" onClick={onClose} aria-label="Close">×</button>
+    <article className="appliance">
+      <div className="appliance-top">
+        <span className="device-avatar large">
+          <Plug size={22} strokeWidth={2} />
+        </span>
+        <div className="appliance-title">
+          <h3>{device.name}</h3>
+          <span>
+            {device.powerKw} kW · {formatDuration(device.durationMinutes)} ·{" "}
+            {device.runFrom && device.runUntil ? `${device.runFrom}–${device.runUntil}` : "jebkad"}
+          </span>
+        </div>
+        <div className="appliance-actions">
+          <button className="icon-button" aria-label="Labot" title="Labot" onClick={onEdit}>
+            <Pencil size={17} />
+          </button>
+          <button className="icon-button danger" aria-label="Dzēst" title="Dzēst" onClick={onDelete}>
+            <Trash2 size={17} />
+          </button>
+        </div>
       </div>
 
-      <div className="edit-menu-field-name">Nosaukums</div>
-      <input className="edit-menu-input" value={draft.name}
-        onChange={e => setDraft({ ...draft, name: e.target.value })} />
-
-      <div className="edit-menu-field-name">Jauda</div>
-      <input className="edit-menu-input" value={draft.powerKw}
-        onChange={e => setDraft({ ...draft, powerKw: formatInputField(e.target.value, draft.powerKw) })} />
-
-      <div className="edit-menu-field-name">Cikls</div>
-      <div className="edit-menu-range">
-        <input type="number" min={0} className="edit-menu-input" value={hours}
-          onChange={e => setDraft({ ...draft, durationMinutes: formatInputField(e.target.value, hours) * 60 + minutes })} />
-        <span>h</span>
-        <input type="number" min={0} max={59} className="edit-menu-input" value={minutes}
-          onChange={e => setDraft({ ...draft, durationMinutes: hours * 60 + formatInputField(e.target.value, minutes) })} />
-        <span>min</span>
+      <div className="appliance-best">
+        <div>
+          <strong className="appliance-time">{start !== undefined ? formatTime(start) : "—"}</strong>
+          <span className="appliance-day">{start !== undefined ? dayLabel(start) : "Gaida cenas"}</span>
+        </div>
+        {best && (
+          <div className="appliance-cost">
+            <strong>{best.cost.toFixed(2)} €</strong>
+            {best.rating === "cheap" && <span className="chip-cheap">Cheap</span>}
+          </div>
+        )}
       </div>
 
-      <div className="edit-menu-splittable-container">
-        <div className="edit-menu-field-name">Vai patēriņš dalāms?</div>
-        <input type="checkbox" checked={draft.splittable}
-          onChange={e => setDraft({ ...draft, splittable: e.target.checked })} />
+      <div className="spark">
+        <ResponsiveContainer width="100%" height="100%">
+          <AreaChart data={prices} margin={{ top: 4, right: 0, bottom: 0, left: 0 }}>
+            <defs>
+              <linearGradient id={`spark-${device.id}`} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="var(--primary)" stopOpacity={0.2} />
+                <stop offset="100%" stopColor="var(--primary)" stopOpacity={0} />
+              </linearGradient>
+            </defs>
+            <XAxis dataKey="time" type="number" scale="time" domain={["dataMin", "dataMax"]} hide />
+            <YAxis hide domain={["dataMin - 0.02", "dataMax + 0.02"]} />
+            {best?.windows.map(w => (
+              <ReferenceArea key={w.start} x1={w.start} x2={w.end} ifOverflow="hidden" fill="var(--primary)" fillOpacity={0.16} stroke="none" />
+            ))}
+            <Area
+              type="monotone"
+              dataKey="price"
+              stroke="var(--primary)"
+              strokeWidth={2}
+              fill={`url(#spark-${device.id})`}
+              dot={false}
+              isAnimationActive={false}
+            />
+          </AreaChart>
+        </ResponsiveContainer>
+      </div>
+      <div className="spark-axis">
+        <span>Tagad</span>
+        <span>{prices.length > 0 ? `${dayLabel(prices[prices.length - 1].end - 1)} ${formatTime(prices[prices.length - 1].end)}` : ""}</span>
       </div>
 
-      <div className="edit-menu-field-name">Atļautais laiks</div>
-      <div className="edit-menu-range">
-        <input type="time" step={900} className="edit-menu-input" value={draft.runFrom ?? ""}
-          onChange={e => setDraft({ ...draft, runFrom: e.target.value || null })} />
-        <span>–</span>
-        <input type="time" step={900} className="edit-menu-input" value={draft.runUntil ?? ""}
-          onChange={e => setDraft({ ...draft, runUntil: e.target.value || null })} />
-      </div>
-      {rangeError && <div className="edit-menu-error">{rangeError}</div>}
-      {durationMinutesError && <div className="edit-menu-error">{durationMinutesError}</div>}
+      {options && options.length > 1 && (
+        <>
+          <button className={expanded ? "appliance-toggle open" : "appliance-toggle"} onClick={() => setExpanded(!expanded)}>
+            {expanded ? "Paslēpt" : options.length === 2 ? "Vēl 1 variants" : `Vēl ${options.length - 1} varianti`}
+            <ChevronDown size={16} />
+          </button>
+          {expanded && <OptionList options={options} className="card-options" />}
+        </>
+      )}
+    </article>
+  )
+}
 
-      <div className="edit-menu-buttons">
-        <button disabled={!!rangeError || !!durationMinutesError}
-          onClick={() => { onSave(draft); onClose() }}>Saglabāt</button>
-        <button onClick={onClose}>Atcelt</button>
-      </div>
+type SheetProps = {
+  initial: NewDevice
+  title: string
+  submitLabel: string
+  onClose: () => void
+  onSave: (device: NewDevice) => void
+  onDelete?: () => boolean
+}
+
+function DeviceSheet({ initial, title, submitLabel, onClose, onSave, onDelete }: SheetProps) {
+  const [draft, setDraft] = useState(initial)
+  const [power, setPower] = useState(initial.powerKw ? String(initial.powerKw) : "")
+  const [limited, setLimited] = useState(Boolean(initial.runFrom && initial.runUntil))
+  const [submitted, setSubmitted] = useState(false)
+
+  useEffect(() => {
+    function handleKey(e: KeyboardEvent) {
+      if (e.key === "Escape") onClose()
+    }
+    document.addEventListener("keydown", handleKey)
+    return () => document.removeEventListener("keydown", handleKey)
+  }, [onClose])
+
+  const hours = Math.floor(draft.durationMinutes / 60)
+  const minutes = draft.durationMinutes % 60
+  const powerKw = Number(power.replace(",", "."))
+
+  const error =
+    !draft.name.trim() ? "Ievadi ierīces nosaukumu" :
+    !(powerKw > 0) ? "Ievadi jaudu kilovatos" :
+    !(draft.durationMinutes > 0) ? "Ievadi cikla ilgumu" :
+    limited && (!draft.runFrom || !draft.runUntil) ? "Norādi abus laikus" :
+    limited && draft.runFrom && draft.runUntil && draft.durationMinutes > intervalMinutes(draft.runFrom, draft.runUntil)
+      ? "Cikls neietilpst atļautajā laikā" :
+    null
+
+  function setLimitedWindow(on: boolean) {
+    setLimited(on)
+    if (on && !draft.runFrom && !draft.runUntil) setDraft({ ...draft, runFrom: "22:00", runUntil: "07:00" })
+  }
+
+  function handleSubmit(e: FormEvent) {
+    e.preventDefault()
+    setSubmitted(true)
+    if (error) return
+    onSave({
+      ...draft,
+      name: draft.name.trim(),
+      powerKw,
+      runFrom: limited ? draft.runFrom : null,
+      runUntil: limited ? draft.runUntil : null,
+    })
+    onClose()
+  }
+
+  return (
+    <div className="sheet-backdrop" onMouseDown={e => e.target === e.currentTarget && onClose()}>
+      <form className="sheet" role="dialog" aria-modal="true" aria-label={title} onSubmit={handleSubmit}>
+        <header className="sheet-header">
+          <h2>{title}</h2>
+          <button type="button" className="icon-button" aria-label="Aizvērt" onClick={onClose}>
+            <X size={20} />
+          </button>
+        </header>
+
+        <label className="field">
+          <span>Nosaukums</span>
+          <input
+            autoFocus
+            placeholder="Piem., veļasmašīna"
+            value={draft.name}
+            onChange={e => setDraft({ ...draft, name: e.target.value })}
+          />
+        </label>
+
+        <div className="field-row">
+          <label className="field">
+            <span>Jauda</span>
+            <div className="input-suffix">
+              <input inputMode="decimal" placeholder="2,0" value={power} onChange={e => setPower(e.target.value)} />
+              <em>kW</em>
+            </div>
+          </label>
+          <div className="field">
+            <span>Cikla ilgums</span>
+            <div className="field-pair">
+              <div className="input-suffix">
+                <input
+                  type="number"
+                  min={0}
+                  placeholder="0"
+                  aria-label="Stundas"
+                  value={hours || ""}
+                  onChange={e => setDraft({ ...draft, durationMinutes: (Number(e.target.value) || 0) * 60 + minutes })}
+                />
+                <em>h</em>
+              </div>
+              <div className="input-suffix">
+                <input
+                  type="number"
+                  min={0}
+                  max={59}
+                  placeholder="0"
+                  aria-label="Minūtes"
+                  value={minutes || ""}
+                  onChange={e => setDraft({ ...draft, durationMinutes: hours * 60 + Math.min(59, Number(e.target.value) || 0) })}
+                />
+                <em>min</em>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="field">
+          <span>Patēriņa veids</span>
+          <div className="segmented full" role="radiogroup">
+            <button
+              type="button"
+              role="radio"
+              aria-checked={!draft.splittable}
+              className={draft.splittable ? "" : "active"}
+              onClick={() => setDraft({ ...draft, splittable: false })}
+            >
+              Nepārtraukts
+            </button>
+            <button
+              type="button"
+              role="radio"
+              aria-checked={draft.splittable}
+              className={draft.splittable ? "active" : ""}
+              onClick={() => setDraft({ ...draft, splittable: true })}
+            >
+              Dalāms
+            </button>
+          </div>
+          <small>
+            {draft.splittable
+              ? "Var darboties ar pārtraukumiem, piem., auto uzlāde."
+              : "Darbojas bez pārtraukuma no sākuma līdz beigām, piem., veļasmašīna."}
+          </small>
+        </div>
+
+        <div className="field">
+          <div className="switch-row">
+            <span>Ierobežot darbības laiku</span>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={limited}
+              aria-label="Ierobežot darbības laiku"
+              className={limited ? "switch on" : "switch"}
+              onClick={() => setLimitedWindow(!limited)}
+            />
+          </div>
+          {limited && (
+            <div className="field-pair">
+              <input
+                type="time"
+                step={900}
+                aria-label="No"
+                value={draft.runFrom ?? ""}
+                onChange={e => setDraft({ ...draft, runFrom: e.target.value || null })}
+              />
+              <span className="field-dash">–</span>
+              <input
+                type="time"
+                step={900}
+                aria-label="Līdz"
+                value={draft.runUntil ?? ""}
+                onChange={e => setDraft({ ...draft, runUntil: e.target.value || null })}
+              />
+            </div>
+          )}
+        </div>
+
+        {submitted && error && <p className="sheet-error">{error}</p>}
+
+        <footer className="sheet-footer">
+          {onDelete && (
+            <button type="button" className="button-danger-text" onClick={() => onDelete() && onClose()}>
+              <Trash2 size={17} />
+              Dzēst
+            </button>
+          )}
+          <button type="button" className="button-secondary" onClick={onClose}>
+            Atcelt
+          </button>
+          <button type="submit" className="button-primary">
+            {submitLabel}
+          </button>
+        </footer>
+      </form>
     </div>
   )
 }

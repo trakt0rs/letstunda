@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
+import { LayoutGrid, LogOut, Plug, Zap } from 'lucide-react'
+import { NavLink, Route, Routes } from 'react-router'
 import { authClient } from './lib/auth-client'
 import { useDevices } from './lib/useDevices'
 import { useSchedules } from './lib/useSchedules'
-import DeviceCards from './DeviceCards'
 import PriceChart from './PriceChart'
-import { Routes, Route, NavLink } from 'react-router'
+import DeviceList from './DeviceList'
 import { DevicesPage } from './DevicesPage'
 
 type Props = {
@@ -12,59 +13,68 @@ type Props = {
 }
 
 function MainScreen({ user }: Props) {
-  const [open, setOpen] = useState(false)
-  const dropdownRef = useRef<HTMLDivElement>(null)
-
-  const { devices, updateDevice, deleteDevice, addDevice } = useDevices();
+  const { devices, updateDevice, deleteDevice, addDevice } = useDevices()
   const schedules = useSchedules(devices)
   const [selectedId, setSelectedId] = useState<string | null>(null)
 
-  useEffect(() => {
-    if (!open) return
-    function handleClick(e: MouseEvent) {
-      if (!dropdownRef.current?.contains(e.target as Node)) setOpen(false)
-    }
-    document.addEventListener('mousedown', handleClick)
-    return () => document.removeEventListener('mousedown', handleClick)
-  }, [open])
-
   return (
-    <div className="app">
-      <nav className="navbar">
-        <div className="nav-left">
-          <span className="logo">Lētstunda</span>
-          <NavLink to="/" end className="nav-link">Pārskats</NavLink>
-          <NavLink to="/devices" className="nav-link">Ierīces</NavLink>
+    <div className="shell">
+      <aside className="sidebar">
+        <div className="sidebar-brand">
+          <span className="logo-mark">
+            <Zap size={16} strokeWidth={2.25} />
+          </span>
+          Lētstunda
         </div>
-        <div className="profile" ref={dropdownRef}>
-          <button className="profile-button" onClick={() => setOpen(!open)}>
-            <span className="avatar">{user.email[0].toUpperCase()}</span>
-            {user.email}
+        <nav className="sidebar-nav">
+          <NavLink to="/" end className="sidebar-link">
+            <LayoutGrid size={18} strokeWidth={2} />
+            <span>Pārskats</span>
+          </NavLink>
+          <NavLink to="/devices" className="sidebar-link">
+            <Plug size={18} strokeWidth={2} />
+            <span>Ierīces</span>
+          </NavLink>
+        </nav>
+        <div className="sidebar-account">
+          <span className="avatar">{user.email[0].toUpperCase()}</span>
+          <span className="sidebar-email">{user.email}</span>
+          <button className="icon-button" aria-label="Iziet" title="Iziet" onClick={() => authClient.signOut()}>
+            <LogOut size={18} />
           </button>
-          {open && (
-            <div className="dropdown">
-              <button onClick={() => authClient.signOut()}>Logout</button>
-            </div>
-          )}
         </div>
-      </nav>
-      <main className="content">
+      </aside>
+
+      <main className="main">
         <Routes>
-          <Route path="/" element={<>
-            <PriceChart options={selectedId ? schedules.get(selectedId) : undefined} />
-            <DeviceCards
-              devices={devices}
-              selectedId={selectedId}
-              onSelect={(id) => setSelectedId(id === selectedId ? null : id)}
-            />
-          </>} />
-          <Route path="/devices" element={<DevicesPage
-            devices={devices}
-            updateDevice={updateDevice}
-            deleteDevice={deleteDevice}
-            addDevice={addDevice}
-            schedules={schedules}
-          />} />
+          <Route
+            path="/"
+            element={
+              <div className="overview">
+                <PriceChart options={selectedId ? schedules.get(selectedId) : undefined} />
+                <DeviceList
+                  devices={devices}
+                  schedules={schedules}
+                  selectedId={selectedId}
+                  onSelect={(id) => setSelectedId(id === selectedId ? null : id)}
+                />
+              </div>
+            }
+          />
+          <Route
+            path="/devices"
+            element={
+              <div className="page">
+                <DevicesPage
+                  devices={devices}
+                  updateDevice={updateDevice}
+                  deleteDevice={deleteDevice}
+                  addDevice={addDevice}
+                  schedules={schedules}
+                />
+              </div>
+            }
+          />
         </Routes>
       </main>
     </div>

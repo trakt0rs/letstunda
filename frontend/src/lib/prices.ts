@@ -12,6 +12,13 @@ export const rigaDate = (ms: number) => dateFmt.format(ms)
 export const formatTime = (ms: number) => timeFmt.format(ms)
 export const formatDay = (ms: number) => dayFmt.format(ms)
 
+export function dayLabel(ms: number, now = Date.now()) {
+  const day = rigaDate(ms)
+  if (day === rigaDate(now)) return 'Šodien'
+  if (day === rigaDate(now + 24 * 60 * 60_000)) return 'Rīt'
+  return formatDay(ms)
+}
+
 export type PriceRange = 'upcoming' | 'month'
 
 export async function fetchPrices(range: PriceRange, signal?: AbortSignal): Promise<PricePoint[]> {

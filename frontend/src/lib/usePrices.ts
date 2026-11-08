@@ -27,7 +27,7 @@ export function usePrices(range: PriceRange | null) {
     fetchPrices(range, controller.signal)
       .then(setPrices)
       .catch(() => {
-        if (!controller.signal.aborted) setError('Could not load prices')
+        if (!controller.signal.aborted) setError('Neizdevās ielādēt cenas')
       })
       .finally(() => {
         if (!controller.signal.aborted) setLoading(false)
